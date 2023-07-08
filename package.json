@@ -1,0 +1,329 @@
+{
+  "name": "twig-formatter",
+  "displayName": "Twig Formatter",
+  "description": "Formatter for Twig",
+  "version": "1.0.0",
+  "publisher": "serhatkaya",
+  "license": "MIT",
+  "author": {
+    "name": "Serhat Kaya",
+    "email": "root@serhatkaya.dev",
+    "url": "https://serhatkaya.com.tr"
+  },
+  "homepage": "https://github.com/serhatkaya/vscode-twig-formatter",
+  "bugs": {
+    "url": "https://github.com/serhatkaya/vscode-twig-formatter/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/serhatkaya/vscode-twig-formatter.git"
+  },
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.30.0"
+  },
+  "categories": [
+    "Formatters",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "php",
+    "twig",
+    "craft",
+    "beautify"
+  ],
+  "activationEvents": [
+    "onLanguage:twig"
+  ],
+  "main": "./extension/index",
+  "contributes": {
+    "languages": [
+      {
+        "id": "twig",
+        "aliases": [
+          "HTML (Twig)",
+          "twig"
+        ],
+        "extensions": [
+          ".twig",
+          ".html.twig"
+        ],
+        "configuration": "./src/languages/twig.configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "twig",
+        "scopeName": "text.html.twig",
+        "path": "./src/syntaxes/twig.tmLanguage",
+        "embeddedLanguages": {
+          "source.json": "json",
+          "source.css": "css",
+          "source.css.scss": "scss",
+          "source.js": "javascript",
+          "source.ts": "typescript"
+        }
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Twig Formatter",
+      "properties": {
+        "twig-formatter.formatting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to enable/disable Twig PrettyDiff formatting."
+        },
+        "twig-formatter.braceLine": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true an empty line will be inserted after opening curly braces and before closing curly braces."
+        },
+        "twig-formatter.bracePadding": {
+          "type": "boolean",
+          "default": false,
+          "description": "Inserts a space after the start of a container and before the end of the container if the contents of that container are not indented; such as: conditions, function arguments, and escaped sequences of template strings."
+        },
+        "twig-formatter.braceStyle": {
+          "type": "string",
+          "enum": [
+            "collapse",
+            "collapse-preserve-inline",
+            "expand",
+            "none"
+          ],
+          "default": "none",
+          "description": "Emulates JSBeautify's brace_style option using existing Pretty Diff options."
+        },
+        "twig-formatter.braces": {
+          "type": "boolean",
+          "default": false,
+          "description": "Determines if opening curly braces will exist on the same line as their condition or be forced onto a new line."
+        },
+        "twig-formatter.commentLine": {
+          "type": "boolean",
+          "default": false,
+          "description": "If a blank new line should be forced above comments."
+        },
+        "twig-formatter.comments": {
+          "type": "boolean",
+          "default": false,
+          "description": "This will determine whether comments should always start at position 0 of each line or if comments should be indented according to the code."
+        },
+        "twig-formatter.compressedCss": {
+          "type": "boolean",
+          "default": false,
+          "description": "If CSS should be beautified in a style where the properties and values are minifed for faster reading of selectors."
+        },
+        "twig-formatter.correct": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically correct some sloppiness in code."
+        },
+        "twig-formatter.cssInsertLines": {
+          "type": "boolean",
+          "default": false,
+          "description": "Inserts new line characters between every CSS code block."
+        },
+        "twig-formatter.elseLine": {
+          "type": "boolean",
+          "default": false,
+          "description": "If else_line is true then the keyword 'else' is forced onto a new line."
+        },
+        "twig-formatter.endComma": {
+          "type": "string",
+          "enum": [
+            "always",
+            "never",
+            "none"
+          ],
+          "default": false,
+          "description": "If there should be a trailing comma in arrays and objects. Value multiline only applies to modes beautify and diff."
+        },
+        "twig-formatter.forceAttribute": {
+          "type": "boolean",
+          "default": false,
+          "description": "If all markup attributes should be indented each onto their own line."
+        },
+        "twig-formatter.forceIndent": {
+          "type": "boolean",
+          "default": false,
+          "description": "Will force indentation upon all content and tags without regard for the creation of new text nodes."
+        },
+        "twig-formatter.formatArray": {
+          "type": "string",
+          "enum": [
+            "default",
+            "indent",
+            "inline"
+          ],
+          "default": "default",
+          "description": "Determines if all array indexes should be indented, never indented, or left to the default."
+        },
+        "twig-formatter.formatObject": {
+          "type": "string",
+          "enum": [
+            "default",
+            "indent",
+            "inline"
+          ],
+          "default": "default",
+          "description": "Determines if all object keys should be indented, never indented, or left to the default."
+        },
+        "twig-formatter.functionName": {
+          "type": "boolean",
+          "default": false,
+          "description": "If a space should follow a JavaScript function name."
+        },
+        "twig-formatter.indentStyle": {
+          "type": "string",
+          "enum": [
+            "space",
+            "tab"
+          ],
+          "default": "tab",
+          "description": "Choose to indent using tabs or spaces."
+        },
+        "twig-formatter.indentLevel": {
+          "type": "integer",
+          "default": 0,
+          "description": "How much indentation padding should be applied to beautification? This option is internally used for code that requires switching between libraries."
+        },
+        "twig-formatter.tabSize": {
+          "type": "integer",
+          "default": 0,
+          "description": "0 will default to the editor's tab size. Stores the number of 'inchar' values to comprise a single indentation."
+        },
+        "twig-formatter.methodChain": {
+          "type": "integer",
+          "default": 0,
+          "description": "When to break consecutively chained methods and properties onto separate lines. A negative value disables this option. A value of 0 ensures method chains are never broken."
+        },
+        "twig-formatter.neverFlatten": {
+          "type": "boolean",
+          "default": false,
+          "description": "If destructured lists in script should never be flattend."
+        },
+        "twig-formatter.newLine": {
+          "type": "boolean",
+          "default": true,
+          "description": "Insert an empty line at the end of output."
+        },
+        "twig-formatter.noCaseIndent": {
+          "type": "boolean",
+          "default": false,
+          "description": "If a case statement should receive the same indentation as the containing switch block."
+        },
+        "twig-formatter.noLeadZero": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether leading 0s in CSS values immediately preceeding a decimal should be removed or prevented."
+        },
+        "twig-formatter.objectSort": {
+          "type": "boolean",
+          "default": false,
+          "description": "Sorts markup attributes and properties by key name in script and style."
+        },
+        "twig-formatter.preserve": {
+          "type": "integer",
+          "default": 2,
+          "description": "The maximum number of consecutive empty lines to retain."
+        },
+        "twig-formatter.preserveComment": {
+          "type": "boolean",
+          "default": false,
+          "description": "Prevent comment reformatting due to option wrap."
+        },
+        "twig-formatter.quoteConvert": {
+          "type": "string",
+          "enum": [
+            "double",
+            "none",
+            "single"
+          ],
+          "default": "none",
+          "description": "If the quotes of script strings or markup attributes should be converted to single quotes or double quotes."
+        },
+        "twig-formatter.space": {
+          "type": "boolean",
+          "default": true,
+          "description": "Inserts a space following the function keyword for anonymous functions."
+        },
+        "twig-formatter.spaceClose": {
+          "type": "boolean",
+          "default": false,
+          "description": "Markup self-closing tags end will end with ' />' instead of '/>'."
+        },
+        "twig-formatter.tagMerge": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allows immediately adjacement start and end markup tags of the same name to be combined into a single self-closing tag."
+        },
+        "twig-formatter.tagSort": {
+          "type": "boolean",
+          "default": false,
+          "description": "Sort child items of each respective markup parent element."
+        },
+        "twig-formatter.ternaryLine": {
+          "type": "boolean",
+          "default": true,
+          "description": "If ternary operators in JavaScript ? and : should remain on the same line."
+        },
+        "twig-formatter.unformatted": {
+          "type": "boolean",
+          "default": false,
+          "description": "If markup tags should have their insides preserved. This option is only available to markup and does not support child tokens that require a different lexer."
+        },
+        "twig-formatter.variableList": {
+          "type": "string",
+          "enum": [
+            "each",
+            "list",
+            "none"
+          ],
+          "default": "none",
+          "description": "If consecutive JavaScript variables should be merged into a comma separated list or if variables in a list should be separated."
+        },
+        "twig-formatter.vertical": {
+          "type": "boolean",
+          "default": false,
+          "description": "If lists of assignments and properties should be vertically aligned. This option is not used with the markup lexer."
+        },
+        "twig-formatter.wrap": {
+          "type": "integer",
+          "default": 0,
+          "description": "Character width limit before applying word wrap. A 0 value disables this option. A negative value concatenates script strings."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "start": "rollup -c",
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "build:pack": "npm run build && vsce package",
+    "vscode:prepublish:disabled": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.js --bundle --outfile=extension/index.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.4.1",
+    "esbuild": "^0.18.11",
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^8.8.0",
+    "typescript": "^5.1.6",
+    "vsce": "^2.15.0",
+    "vscode": "^1.1.37"
+  },
+  "dependencies": {
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-json": "^6.0.0",
+    "prettydiff": "^101.2.6",
+    "rollup": "^3.26.2"
+  },
+  "type": "module"
+}
