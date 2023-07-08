@@ -1,5 +1,6 @@
-import vscode from "vscode";
-import prettydiff from "prettydiff";
+const vscode = require("vscode");
+const prettydiff = require("prettydiff");
+
 const editor = vscode.workspace.getConfiguration("editor");
 const config = vscode.workspace.getConfiguration("twig-formatter");
 

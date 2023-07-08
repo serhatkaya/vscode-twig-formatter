@@ -324,6 +324,5 @@
     "@rollup/plugin-json": "^6.0.0",
     "prettydiff": "^101.2.6",
     "rollup": "^3.26.2"
-  },
-  "type": "module"
+  }
 }
