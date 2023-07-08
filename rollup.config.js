@@ -1,6 +1,5 @@
-import json from "@rollup/plugin-json";
-
-export default [
+const json = require("@rollup/plugin-json");
+module.exports = [
   {
     input: "src/extension.js",
     output: {
