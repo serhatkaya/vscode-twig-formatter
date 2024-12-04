@@ -1,5 +1,6 @@
 const vscode = require("vscode");
 const prettydiff = require("prettydiff");
+import * as prettier from "prettier";
 
 const editor = vscode.workspace.getConfiguration("editor");
 const config = vscode.workspace.getConfiguration("twig-formatter");
@@ -21,12 +22,10 @@ function prettyDiff(document, range) {
     indentChar = "\t";
   }
 
-  const regex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
   let sourceCode = document.getText(range);
-  const commentedScripts = sourceCode.replace(regex, "{#!-- $& --!#}");
 
   // Set configuration
-  options.source = commentedScripts;
+  options.source = sourceCode;
   options.mode = "beautify";
   options.language = "html";
   options.lexer = "markup";
@@ -72,13 +71,38 @@ function prettyDiff(document, range) {
 
   prettiedOutput = prettydiff();
 
-  let modifiedSourceCode = prettiedOutput.replace(/{#!--| --!#}/g, "");
-
   options.end = 0;
   options.start = 0;
 
-  result.push(vscode.TextEdit.replace(range, modifiedSourceCode));
+  result.push(vscode.TextEdit.replace(range, prettiedOutput));
   return result;
+}
+
+// Function to format JavaScript code within Twig
+async function formatJavaScriptInTwig(document) {
+  const text = document.getText();
+  const jsRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+  let formattedText = text;
+
+  let match;
+  while ((match = jsRegex.exec(text)) !== null) {
+    const jsCode = match[1];
+    try {
+      // Format JavaScript code asynchronously
+      const formattedJsCode = await prettier.format(jsCode, {
+        parser: "babel",
+      });
+      // Replace the entire script tag content, not just the code
+      formattedText = formattedText.replace(
+        match[0],
+        `<script>${formattedJsCode}</script>`
+      );
+    } catch (error) {
+      console.error("Error formatting JavaScript code:", error);
+    }
+  }
+
+  return formattedText;
 }
 
 function activate(context) {
@@ -115,6 +139,18 @@ function activate(context) {
       },
     })
   );
+
+  // Register the formatter
+  vscode.languages.registerDocumentFormattingEditProvider("twig", {
+    provideDocumentFormattingEdits: async function (document) {
+      const formatted = await formatJavaScriptInTwig(document);
+      const fullRange = new vscode.Range(
+        document.positionAt(0),
+        document.positionAt(document.getText().length)
+      );
+      return [vscode.TextEdit.replace(fullRange, formatted)];
+    },
+  });
 }
 
 exports.activate = activate;

@@ -322,6 +322,7 @@
   "dependencies": {
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-json": "^6.0.0",
+    "prettier": "^3.4.1",
     "prettydiff": "^101.2.6",
     "rollup": "^3.26.2"
   }
