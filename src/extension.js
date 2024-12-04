@@ -78,7 +78,6 @@ function prettyDiff(document, range) {
   return result;
 }
 
-// Function to format JavaScript code within Twig
 async function formatJavaScriptInTwig(text) {
   const jsRegex = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi;
   let formattedText = text;
@@ -88,7 +87,7 @@ async function formatJavaScriptInTwig(text) {
     const scriptAttributes = match[1];
     const jsCode = match[2];
     try {
-      // Format JavaScript code asynchronously with Prettier options
+      // Format Js code asynchronously with Prettier options
       const formattedJsCode = await prettier.format(jsCode, {
         parser: "babel",
         printWidth: 80,
@@ -102,10 +101,17 @@ async function formatJavaScriptInTwig(text) {
         arrowParens: "avoid",
         endOfLine: "lf",
       });
+
+      const indentedJsCode = formattedJsCode
+        .split("\n")
+        .map((line) => `\t${line}`) // Add a tab for indentation
+        .join("\n")
+        .trimEnd();
+
       // Replace the script content while preserving attributes
       formattedText = formattedText.replace(
         match[0],
-        `<script${scriptAttributes}>\n${formattedJsCode}</script>`
+        `<script${scriptAttributes}>\n${indentedJsCode}\n</script>`
       );
     } catch (error) {
       console.error("Error formatting JavaScript code:", error);
@@ -126,7 +132,7 @@ async function formatDocument(document) {
   // First, format the Twig content
   const twigFormatted = prettyDiff(document, range);
 
-  // Then, format the JavaScript within the formatted Twig content
+  // Then, format the Js within the formatted Twig content
   const formattedText = await formatJavaScriptInTwig(twigFormatted[0].newText);
 
   return [vscode.TextEdit.replace(range, formattedText)];
