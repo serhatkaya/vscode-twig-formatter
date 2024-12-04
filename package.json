@@ -122,7 +122,7 @@
         },
         "twig-formatter.singleQuote": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Whether to use single quotes instead of double quotes."
         },
         "twig-formatter.bracketSpacing": {
@@ -134,6 +134,11 @@
           "type": "string",
           "default": "avoid",
           "description": "Whether to always include parentheses around a sole arrow function parameter."
+        },
+        "twig-formatter.bracketSameLine": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to put the `>` of the last child element on the same line as the last child element."
         }
       }
     }

@@ -15,6 +15,8 @@ async function formatEntireFileWithPrettier(text, config) {
       jsxBracketSameLine: false,
       arrowParens: config.arrowParens,
       endOfLine: config.endOfLine,
+      bracketSameLine: config.bracketSameLine,
+
       plugins: [require("prettier-plugin-twig-melody")],
     });
     return formattedText;
