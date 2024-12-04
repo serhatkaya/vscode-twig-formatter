@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 let outputChannel;
+let cachedConfig = null;
 
 function logWithTimestamp(message) {
   const now = new Date();
@@ -11,7 +12,7 @@ function logWithTimestamp(message) {
   outputChannel.appendLine(`[${timestamp}] ${message}`);
 }
 
-async function loadProjectConfig() {
+function loadProjectConfig() {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders) return null;
 
@@ -38,42 +39,68 @@ async function loadProjectConfig() {
   return {};
 }
 
-async function formatEntireFileWithPrettier(text, config) {
+function loadConfiguration() {
+  const editorConfig = vscode.workspace.getConfiguration("twig-formatter");
+  const projectConfig = loadProjectConfig();
+  cachedConfig = { ...editorConfig, ...projectConfig };
+  logWithTimestamp("Configuration loaded.");
+}
+
+function watchConfigurationChanges() {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders) return;
+
+  const configFilePath = path.join(
+    workspaceFolders[0].uri.fsPath,
+    "twig-formatter.json"
+  );
+
+  fs.watch(configFilePath, (eventType) => {
+    if (eventType === "change" || eventType === "rename") {
+      logWithTimestamp("twig-formatter.json changed, reloading configuration.");
+      loadConfiguration();
+    }
+  });
+
+  vscode.workspace.onDidChangeConfiguration((event) => {
+    if (event.affectsConfiguration("twig-formatter")) {
+      logWithTimestamp(
+        "Editor configuration changed, reloading configuration."
+      );
+      loadConfiguration();
+    }
+  });
+}
+
+async function formatEntireFileWithPrettier(text, fileName) {
   try {
     const formattedText = await prettier.format(text, {
       parser: "html",
-      printWidth: config.printWidth,
-      tabWidth: config.tabSize > 0 ? config.tabSize : 2,
-      useTabs: config.useTabs,
-      semi: config.semi,
-      singleQuote: config.singleQuote,
-      trailingComma: config.trailingComma,
-      bracketSpacing: config.bracketSpacing,
+      printWidth: cachedConfig.printWidth,
+      tabWidth: cachedConfig.tabSize > 0 ? cachedConfig.tabSize : 2,
+      useTabs: cachedConfig.useTabs,
+      semi: cachedConfig.semi,
+      singleQuote: cachedConfig.singleQuote,
+      trailingComma: cachedConfig.trailingComma,
+      bracketSpacing: cachedConfig.bracketSpacing,
       jsxBracketSameLine: false,
-      arrowParens: config.arrowParens,
-      endOfLine: config.endOfLine,
-      bracketSameLine: config.bracketSameLine,
+      arrowParens: cachedConfig.arrowParens,
+      endOfLine: cachedConfig.endOfLine,
+      bracketSameLine: cachedConfig.bracketSameLine,
       plugins: [require("prettier-plugin-twig-melody")],
     });
 
-    logWithTimestamp("File formatted successfully.");
+    logWithTimestamp(`File formatted successfully: ${fileName}`);
     return formattedText;
   } catch (error) {
-    logWithTimestamp(`Error while formatting: ${error}`);
-    console.error("TwigFormatter: Error while formatting:", error);
+    logWithTimestamp(`Error while formatting ${fileName}: ${error}`);
+    console.error(`TwigFormatter: Error while formatting ${fileName}:`, error);
     return text;
   }
 }
 
 async function formatDocument(document) {
-  let config = vscode.workspace.getConfiguration("twig-formatter");
-
-  const projectConfig = await loadProjectConfig();
-  if (projectConfig) {
-    config = { ...config, ...projectConfig };
-  }
-
-  if (!config.formatting) {
+  if (!cachedConfig.formatting) {
     logWithTimestamp("Formatting is disabled in the configuration.");
     return [];
   }
@@ -85,9 +112,11 @@ async function formatDocument(document) {
   );
   const range = new vscode.Range(start, end);
 
+  const fileName = path.basename(document.uri.fsPath);
+
   const formattedText = await formatEntireFileWithPrettier(
     document.getText(range),
-    config
+    fileName
   );
 
   return [vscode.TextEdit.replace(range, formattedText)];
@@ -96,6 +125,9 @@ async function formatDocument(document) {
 function activate(context) {
   outputChannel = vscode.window.createOutputChannel("Twig Formatter");
   logWithTimestamp("Twig Formatter extension activated.");
+
+  loadConfiguration();
+  watchConfigurationChanges();
 
   context.subscriptions.push(
     vscode.languages.registerDocumentFormattingEditProvider("twig", {
