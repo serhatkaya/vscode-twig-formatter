@@ -27,7 +27,7 @@ function prettyDiff(document, range) {
   // Set configuration
   options.source = sourceCode;
   options.mode = "beautify";
-  options.language = "html";
+  options.language = "twig";
   options.lexer = "markup";
   options.indent_char = indentChar;
   options.indent_size = tabSize;
@@ -79,23 +79,33 @@ function prettyDiff(document, range) {
 }
 
 // Function to format JavaScript code within Twig
-async function formatJavaScriptInTwig(document) {
-  const text = document.getText();
-  const jsRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+async function formatJavaScriptInTwig(text) {
+  const jsRegex = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi;
   let formattedText = text;
 
   let match;
   while ((match = jsRegex.exec(text)) !== null) {
-    const jsCode = match[1];
+    const scriptAttributes = match[1];
+    const jsCode = match[2];
     try {
-      // Format JavaScript code asynchronously
+      // Format JavaScript code asynchronously with Prettier options
       const formattedJsCode = await prettier.format(jsCode, {
         parser: "babel",
+        printWidth: 80,
+        tabWidth: 2,
+        useTabs: false,
+        semi: true,
+        singleQuote: true,
+        trailingComma: "es5",
+        bracketSpacing: true,
+        jsxBracketSameLine: false,
+        arrowParens: "avoid",
+        endOfLine: "lf",
       });
-      // Replace the entire script tag content, not just the code
+      // Replace the script content while preserving attributes
       formattedText = formattedText.replace(
         match[0],
-        `<script>${formattedJsCode}</script>`
+        `<script${scriptAttributes}>\n${formattedJsCode}</script>`
       );
     } catch (error) {
       console.error("Error formatting JavaScript code:", error);
@@ -105,52 +115,41 @@ async function formatJavaScriptInTwig(document) {
   return formattedText;
 }
 
+async function formatDocument(document) {
+  const start = new vscode.Position(0, 0);
+  const end = new vscode.Position(
+    document.lineCount - 1,
+    document.lineAt(document.lineCount - 1).text.length
+  );
+  const range = new vscode.Range(start, end);
+
+  // First, format the Twig content
+  const twigFormatted = prettyDiff(document, range);
+
+  // Then, format the JavaScript within the formatted Twig content
+  const formattedText = await formatJavaScriptInTwig(twigFormatted[0].newText);
+
+  return [vscode.TextEdit.replace(range, formattedText)];
+}
+
 function activate(context) {
   context.subscriptions.push(
     vscode.languages.registerDocumentFormattingEditProvider("twig", {
-      provideDocumentFormattingEdits: function (document) {
-        const start = new vscode.Position(0, 0);
-        const end = new vscode.Position(
-          document.lineCount - 1,
-          document.lineAt(document.lineCount - 1).text.length
-        );
-        const rng = new vscode.Range(start, end);
-        return prettyDiff(document, rng);
+      provideDocumentFormattingEdits: async function (document) {
+        return await formatDocument(document);
       },
     })
   );
 
   context.subscriptions.push(
     vscode.languages.registerDocumentRangeFormattingEditProvider("twig", {
-      provideDocumentRangeFormattingEdits: function (document, range) {
-        let end = range.end;
-
-        if (end.character === 0) {
-          end = end.translate(-1, Number.MAX_VALUE);
-        } else {
-          end = end.translate(0, Number.MAX_VALUE);
-        }
-
-        const rng = new vscode.Range(
-          new vscode.Position(range.start.line, 0),
-          end
-        );
-        return prettyDiff(document, rng);
+      provideDocumentRangeFormattingEdits: async function (document, range) {
+        const text = document.getText(range);
+        const formattedText = await formatJavaScriptInTwig(text);
+        return [vscode.TextEdit.replace(range, formattedText)];
       },
     })
   );
-
-  // Register the formatter
-  vscode.languages.registerDocumentFormattingEditProvider("twig", {
-    provideDocumentFormattingEdits: async function (document) {
-      const formatted = await formatJavaScriptInTwig(document);
-      const fullRange = new vscode.Range(
-        document.positionAt(0),
-        document.positionAt(document.getText().length)
-      );
-      return [vscode.TextEdit.replace(fullRange, formatted)];
-    },
-  });
 }
 
 exports.activate = activate;
