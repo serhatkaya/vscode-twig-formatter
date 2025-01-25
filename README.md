@@ -11,7 +11,7 @@ If you're interested in taking over maintenance, contributing new features, or f
 1. **Fork the Repository**: Start by forking this repository to your GitHub account.
 2. **Clone Your Fork**: Clone your forked repository to your local machine.
    ```bash
-   git clone https://github.com/serhatkaya/vscode-twig-formatter.git
+   git clone https://github.com/<yourusername>/vscode-twig-formatter.git
    ```
 3. **Install Dependencies**: Run the following command to install the required dependencies:
    ```bash
